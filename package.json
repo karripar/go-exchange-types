@@ -25,18 +25,11 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc",
-        "prepare": "npm run build"
+        "build": "tsc"
     },
     "private": true,
     "author": "Karri Partanen, Elli Riskala, Samu Kangas, Odette Uzamukunda",
     "devDependencies": {
-        "typescript": "^5.0.0",
-        "va-hybrid-types": "git+https://gitlab.metropolia.fi/go-exchange/go-exchange-types.git"
-    },
-    "dependencies": {
-        "next": "^15.5.4",
-        "react": "^19.2.0",
-        "va-hybrid-types": "git+https://gitlab.metropolia.fi/go-exchange/go-exchange-types.git"
+        "typescript": "^5.0.0"
     }
 }
