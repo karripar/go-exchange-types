@@ -39,6 +39,11 @@ type ParsedPdfExtractionPreview = {
   status: "queued" | "running" | "completed" | "failed";
 };
 
+type ParsedPdfReviewPatch = {
+  reviewerNotes?: string;
+  currentRow?: Partial<PdfExtractionPreviewRowDTO>;
+};
+
 function parseBbox(raw: string): ParseResult<[number, number, number, number]> {
   const values = raw
     .split(",")
@@ -208,10 +213,101 @@ function parsePdfExtractionPreviewPayload(input: unknown): ParseResult<ParsedPdf
   };
 }
 
+function parsePdfReviewRowPatchInput(input: unknown): ParseResult<ParsedPdfReviewPatch> {
+  if (!input || typeof input !== "object") {
+    return { ok: false, error: "Patch payload must be an object" };
+  }
+
+  const payload = input as Record<string, unknown>;
+  const reviewerNotesRaw = payload.reviewerNotes;
+  const reviewerNotes = typeof reviewerNotesRaw === "string" ? reviewerNotesRaw.trim() : undefined;
+
+  const currentRowRaw = payload.currentRow;
+  if (currentRowRaw == null) {
+    return { ok: true, value: { reviewerNotes } };
+  }
+
+  if (typeof currentRowRaw !== "object" || Array.isArray(currentRowRaw)) {
+    return { ok: false, error: "currentRow must be an object" };
+  }
+
+  const row = currentRowRaw as Record<string, unknown>;
+  const patch: Partial<PdfExtractionPreviewRowDTO> = {};
+
+  const setString = (key: keyof PdfExtractionPreviewRowDTO) => {
+    if (key in row) patch[key] = String(row[key] ?? "").trim() as never;
+  };
+
+  setString("institutionName");
+  setString("subunitName");
+  setString("country");
+  setString("continent");
+  setString("agreementAppliesTo");
+  setString("furtherInfo");
+  setString("sourceSnippet");
+
+  if ("cities" in row) patch.cities = normalizeStringArray(row.cities);
+  if ("degreeProgrammesInAgreement" in row) patch.degreeProgrammesInAgreement = normalizeStringArray(row.degreeProgrammesInAgreement);
+  if ("mobilityProgrammes" in row) patch.mobilityProgrammes = normalizeStringArray(row.mobilityProgrammes);
+  if ("missingFields" in row) patch.missingFields = normalizeStringArray(row.missingFields);
+  if ("aiFlags" in row) patch.aiFlags = normalizeStringArray(row.aiFlags);
+
+  if ("sourcePage" in row) {
+    const value = Number(row.sourcePage);
+    if (!Number.isFinite(value) || value < 0) return { ok: false, error: "sourcePage must be a non-negative number" };
+    patch.sourcePage = value;
+  }
+
+  if ("confidence" in row) {
+    const value = Number(row.confidence);
+    if (!Number.isFinite(value) || value < 0 || value > 1) return { ok: false, error: "confidence must be between 0 and 1" };
+    patch.confidence = value;
+  }
+
+  if ("tuitionFeeBased" in row) patch.tuitionFeeBased = Boolean(row.tuitionFeeBased);
+  if ("agreementNegotiationsOngoing" in row) patch.agreementNegotiationsOngoing = Boolean(row.agreementNegotiationsOngoing);
+
+  if ("languageRequirements" in row) {
+    const lang = row.languageRequirements;
+    if (!lang || typeof lang !== "object" || Array.isArray(lang)) {
+      return { ok: false, error: "languageRequirements must be an object" };
+    }
+    const langObj = lang as Record<string, unknown>;
+    patch.languageRequirements = {
+      summary: String(langObj.summary ?? "").trim(),
+      cefrLevel: String(langObj.cefrLevel ?? "").trim(),
+      localLanguageRequirement: String(langObj.localLanguageRequirement ?? "").trim(),
+      englishRequirement: String(langObj.englishRequirement ?? "").trim(),
+    };
+  }
+
+  return {
+    ok: true,
+    value: {
+      reviewerNotes,
+      currentRow: patch,
+    },
+  };
+}
+
+function getPdfRowCommitBlockers(row: PdfExtractionPreviewRowDTO): string[] {
+  const blockers: string[] = [];
+  if (!row.institutionName?.trim()) blockers.push("institutionName_missing");
+  if (!row.country?.trim()) blockers.push("country_missing");
+  if (!Array.isArray(row.cities) || row.cities.length === 0) blockers.push("cities_missing");
+  if (!row.sourceSnippet?.trim()) blockers.push("sourceSnippet_missing");
+  if (!Number.isFinite(row.sourcePage) || row.sourcePage < 0) blockers.push("sourcePage_invalid");
+  if (!Number.isFinite(row.confidence) || row.confidence < 0 || row.confidence > 1) blockers.push("confidence_invalid");
+  if (Array.isArray(row.validationFlags) && row.validationFlags.length > 0) blockers.push("validation_flags_present");
+  return blockers;
+}
+
 export {
   parseMapPointsQuery,
   parseGeocodeStartInput,
   parsePdfExtractionPreviewPayload,
+  parsePdfReviewRowPatchInput,
+  getPdfRowCommitBlockers,
 };
 
 export type {
@@ -219,4 +315,5 @@ export type {
   ParsedMapPointsQuery,
   ParsedGeocodeStart,
   ParsedPdfExtractionPreview,
+  ParsedPdfReviewPatch,
 };

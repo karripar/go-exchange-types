@@ -157,6 +157,51 @@ type PdfExtractionPreviewRowDTO = {
   reviewStatus?: PdfPreviewReviewStatus;
 };
 
+type PdfReviewRowDTO = {
+  rowId: string;
+  reviewState: PdfPreviewReviewStatus;
+  editedBy?: string;
+  editedAt?: string;
+  reviewerNotes?: string;
+  wasEdited?: boolean;
+  originalExtractedRow: PdfExtractionPreviewRowDTO;
+  currentRow: PdfExtractionPreviewRowDTO;
+};
+
+type PdfReviewRowPatchDTO = {
+  reviewerNotes?: string;
+  currentRow?: Partial<PdfExtractionPreviewRowDTO>;
+};
+
+type PdfReviewSummaryDTO = {
+  _id: string;
+  status: PdfImportJobStatus;
+  totalRows: number;
+  approvedCount: number;
+  rejectedCount: number;
+  pendingCount: number;
+  editedCount: number;
+  warnings: string[];
+};
+
+type PdfCommitPreviewBlockedRowDTO = {
+  rowId: string;
+  reviewState: PdfPreviewReviewStatus;
+  blockers: string[];
+  currentRow: PdfExtractionPreviewRowDTO;
+};
+
+type PdfCommitPreviewDTO = {
+  _id: string;
+  approvedCount: number;
+  rejectedCount: number;
+  pendingCount: number;
+  editedCount: number;
+  commitReadyRows: PdfReviewRowDTO[];
+  blockedRows: PdfCommitPreviewBlockedRowDTO[];
+  warnings: string[];
+};
+
 type PdfExtractionSummaryDTO = {
   totalRows: number;
   rowsWithWarnings: number;
@@ -190,7 +235,7 @@ type StartPdfImportResponseDTO = {
 type PdfImportRowsResponseDTO = {
   _id: string;
   status: PdfImportJobStatus;
-  rows: PdfExtractionPreviewRowDTO[];
+  rows: PdfReviewRowDTO[];
   extractionSummary?: PdfExtractionSummaryDTO;
   warnings?: string[];
   fileMetadata: PdfFileMetadataDTO;
@@ -219,4 +264,9 @@ export type {
   PdfImportStatusDTO,
   StartPdfImportResponseDTO,
   PdfImportRowsResponseDTO,
+  PdfReviewRowDTO,
+  PdfReviewRowPatchDTO,
+  PdfReviewSummaryDTO,
+  PdfCommitPreviewBlockedRowDTO,
+  PdfCommitPreviewDTO,
 };

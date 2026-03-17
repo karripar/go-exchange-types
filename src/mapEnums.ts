@@ -2,7 +2,7 @@ const PARTNER_SCHOOL_STATUSES = ["confirmed", "negotiation", "unknown"] as const
 const GEOCODE_PRECISIONS = ["none", "city", "manual"] as const;
 const MAP_JOB_STATUSES = ["queued", "running", "succeeded", "failed"] as const;
 const PDF_IMPORT_JOB_STATUSES = ["queued", "running", "completed", "failed"] as const;
-const PDF_PREVIEW_REVIEW_STATUSES = ["pending", "approved", "rejected"] as const;
+const PDF_PREVIEW_REVIEW_STATUSES = ["pending", "approved", "rejected", "edited"] as const;
 
 const MAP_DEFAULTS = {
   geocodeLimit: 250,
