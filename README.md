@@ -5,4 +5,4 @@ Hybrid types made ready to install through node.js for the vaihtoaktivaattori pr
 
 - Check `src/DBTypes.ts` for instructions how to write types
 
-- Install the types as a node module by running `npm i --save-dev github:karripar/va-hybrid-types` in your project root
+- Install the types as a node module by running `npm i --save-dev git+https://gitlab.metropolia.fi/go-exchange/go-exchange-types.git` in your project root
