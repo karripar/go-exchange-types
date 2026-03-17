@@ -1,4 +1,12 @@
-import type { GeocodePrecision, MapJobStatus, PartnerSchoolStatus, PdfCommitStatus, PdfImportJobStatus, PdfPreviewReviewStatus } from "./mapEnums";
+import type {
+  GeocodePrecision,
+  MapJobStatus,
+  PartnerSchoolStatus,
+  PdfCommitStatus,
+  PdfImportJobStatus,
+  PdfImportStatusDetail,
+  PdfPreviewReviewStatus,
+} from "./mapEnums";
 
 type MapPointDTO = {
   id: string;
@@ -251,12 +259,29 @@ type PdfFileMetadataDTO = {
 type PdfImportStatusDTO = {
   _id: string;
   status: PdfImportJobStatus;
+  statusDetail?: PdfImportStatusDetail;
+  orchestrationMode?: "single" | "chunked";
   createdAt: string;
   startedAt?: string;
   finishedAt?: string;
   errorLog?: string;
   extractionSummary?: PdfExtractionSummaryDTO;
   warnings?: string[];
+  chunking?: {
+    totalChunks: number;
+    chunkSizePages: number;
+    strategyVersion: string;
+  };
+  progress?: {
+    chunksQueued: number;
+    chunksRunning: number;
+    chunksCompleted: number;
+    chunksFailed: number;
+    chunksRetried: number;
+    mergeStartedAt?: string;
+    mergeFinishedAt?: string;
+    lastChunkFinishedAt?: string;
+  };
   fileMetadata: PdfFileMetadataDTO;
 };
 
