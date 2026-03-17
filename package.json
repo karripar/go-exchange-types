@@ -25,7 +25,8 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc"
+        "build": "tsc",
+        "prepare": "npm run build"
     },
     "private": true,
     "author": "Karri Partanen, Elli Riskala, Samu Kangas, Odette Uzamukunda",
