@@ -1,7 +1,7 @@
 const PARTNER_SCHOOL_STATUSES = ["confirmed", "negotiation", "unknown"] as const;
 const GEOCODE_PRECISIONS = ["none", "city", "manual"] as const;
 const MAP_JOB_STATUSES = ["queued", "running", "succeeded", "failed"] as const;
-const PDF_IMPORT_JOB_STATUSES = ["queued", "running", "completed", "failed"] as const;
+const PDF_IMPORT_JOB_STATUSES = ["queued", "running", "cancelling", "cancelled", "completed", "failed"] as const;
 const PDF_IMPORT_STATUS_DETAILS = [
   "upload_complete",
   "chunking_started",
@@ -10,6 +10,8 @@ const PDF_IMPORT_STATUS_DETAILS = [
   "review_ready",
   "failed_partial",
   "failed_terminal",
+  "cancelling",
+  "cancelled",
 ] as const;
 const PDF_PREVIEW_REVIEW_STATUSES = ["pending", "approved", "rejected", "edited"] as const;
 const PDF_COMMIT_STATUSES = ["idle", "queued", "running", "completed", "failed"] as const;

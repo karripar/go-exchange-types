@@ -334,6 +334,12 @@ type StartPdfImportResponseDTO = {
   importId: string;
 };
 
+type StartPdfImportModeDTO = "single" | "chunked";
+
+type StartPdfImportRequestDTO = {
+  mode?: StartPdfImportModeDTO;
+};
+
 type PdfImportRowsResponseDTO = {
   _id: string;
   status: PdfImportJobStatus;
@@ -341,6 +347,13 @@ type PdfImportRowsResponseDTO = {
   extractionSummary?: PdfExtractionSummaryDTO;
   warnings?: string[];
   fileMetadata: PdfFileMetadataDTO;
+};
+
+type CancelPdfImportResponseDTO = {
+  importId: string;
+  status: PdfImportJobStatus;
+  statusDetail?: PdfImportStatusDetail;
+  message: string;
 };
 
 export type {
@@ -365,7 +378,10 @@ export type {
   PdfFileMetadataDTO,
   PdfImportStatusDTO,
   StartPdfImportResponseDTO,
+  StartPdfImportModeDTO,
+  StartPdfImportRequestDTO,
   PdfImportRowsResponseDTO,
+  CancelPdfImportResponseDTO,
   PdfReviewRowDTO,
   PdfReviewRowPatchDTO,
   PdfReviewSummaryDTO,
