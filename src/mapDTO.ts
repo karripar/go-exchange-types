@@ -261,6 +261,12 @@ type PdfImportStatusDTO = {
   status: PdfImportJobStatus;
   statusDetail?: PdfImportStatusDetail;
   orchestrationMode?: "single" | "chunked";
+  parentImportId?: string;
+  chunkIndex?: number;
+  pageRange?: {
+    startPage: number;
+    endPage: number;
+  };
   createdAt: string;
   startedAt?: string;
   finishedAt?: string;
@@ -281,6 +287,28 @@ type PdfImportStatusDTO = {
     mergeStartedAt?: string;
     mergeFinishedAt?: string;
     lastChunkFinishedAt?: string;
+  };
+  orchestration?: {
+    isParent: boolean;
+    parentImportId?: string;
+    childCounts?: {
+      total: number;
+      queued: number;
+      running: number;
+      completed: number;
+      failed: number;
+    };
+    childChunks?: Array<{
+      importId: string;
+      chunkIndex: number;
+      status: PdfImportJobStatus;
+      statusDetail?: PdfImportStatusDetail;
+      attempt: number;
+      pageRange?: {
+        startPage: number;
+        endPage: number;
+      };
+    }>;
   };
   fileMetadata: PdfFileMetadataDTO;
 };
