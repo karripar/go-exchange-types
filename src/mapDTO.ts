@@ -284,9 +284,18 @@ type PdfImportStatusDTO = {
     chunksCompleted: number;
     chunksFailed: number;
     chunksRetried: number;
+    progressPercent?: number;
     mergeStartedAt?: string;
     mergeFinishedAt?: string;
     lastChunkFinishedAt?: string;
+  };
+  latestContextSnapshot?: {
+    currentContinent?: string;
+    currentCountry?: string;
+    lastInstitutionFingerprint?: string;
+    lastRowTail?: string;
+    sourceChunkIndex?: number;
+    capturedAt?: string;
   };
   orchestration?: {
     isParent: boolean;
@@ -307,6 +316,14 @@ type PdfImportStatusDTO = {
       pageRange?: {
         startPage: number;
         endPage: number;
+      };
+      contextSnapshotOut?: {
+        currentContinent?: string;
+        currentCountry?: string;
+        lastInstitutionFingerprint?: string;
+        lastRowTail?: string;
+        sourceChunkIndex?: number;
+        capturedAt?: string;
       };
     }>;
   };
