@@ -1,4 +1,4 @@
-import type { GeocodePrecision, MapJobStatus, PartnerSchoolStatus, PdfImportJobStatus, PdfPreviewReviewStatus } from "./mapEnums";
+import type { GeocodePrecision, MapJobStatus, PartnerSchoolStatus, PdfCommitStatus, PdfImportJobStatus, PdfPreviewReviewStatus } from "./mapEnums";
 
 type MapPointDTO = {
   id: string;
@@ -202,6 +202,38 @@ type PdfCommitPreviewDTO = {
   warnings: string[];
 };
 
+type StartPdfCommitResponseDTO = {
+  importId: string;
+  commitStatus: "queued";
+};
+
+type PdfCommitResultRowDTO = {
+  rowId: string;
+  institutionName: string;
+  result: "committed" | "skipped" | "failed";
+  reason?: string;
+  partnerSchoolId?: string;
+  geocodeStatus?: string;
+  validationFlags: string[];
+};
+
+type PdfCommitResultDTO = {
+  _id: string;
+  status: PdfCommitStatus;
+  requestedAt?: string;
+  startedAt?: string;
+  finishedAt?: string;
+  committedBy?: string;
+  committedCount: number;
+  skippedCount: number;
+  failedCount: number;
+  geocodedCount: number;
+  unresolvedCount: number;
+  warnings: string[];
+  rowResults: PdfCommitResultRowDTO[];
+  errorLog?: string;
+};
+
 type PdfExtractionSummaryDTO = {
   totalRows: number;
   rowsWithWarnings: number;
@@ -269,4 +301,7 @@ export type {
   PdfReviewSummaryDTO,
   PdfCommitPreviewBlockedRowDTO,
   PdfCommitPreviewDTO,
+  StartPdfCommitResponseDTO,
+  PdfCommitResultRowDTO,
+  PdfCommitResultDTO,
 };

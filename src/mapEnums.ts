@@ -3,6 +3,7 @@ const GEOCODE_PRECISIONS = ["none", "city", "manual"] as const;
 const MAP_JOB_STATUSES = ["queued", "running", "succeeded", "failed"] as const;
 const PDF_IMPORT_JOB_STATUSES = ["queued", "running", "completed", "failed"] as const;
 const PDF_PREVIEW_REVIEW_STATUSES = ["pending", "approved", "rejected", "edited"] as const;
+const PDF_COMMIT_STATUSES = ["idle", "queued", "running", "completed", "failed"] as const;
 
 const MAP_DEFAULTS = {
   geocodeLimit: 250,
@@ -15,6 +16,7 @@ type GeocodePrecision = (typeof GEOCODE_PRECISIONS)[number];
 type MapJobStatus = (typeof MAP_JOB_STATUSES)[number];
 type PdfImportJobStatus = (typeof PDF_IMPORT_JOB_STATUSES)[number];
 type PdfPreviewReviewStatus = (typeof PDF_PREVIEW_REVIEW_STATUSES)[number];
+type PdfCommitStatus = (typeof PDF_COMMIT_STATUSES)[number];
 
 export {
   PARTNER_SCHOOL_STATUSES,
@@ -22,6 +24,7 @@ export {
   MAP_JOB_STATUSES,
   PDF_IMPORT_JOB_STATUSES,
   PDF_PREVIEW_REVIEW_STATUSES,
+  PDF_COMMIT_STATUSES,
   MAP_DEFAULTS,
 };
 
@@ -31,4 +34,5 @@ export type {
   MapJobStatus,
   PdfImportJobStatus,
   PdfPreviewReviewStatus,
+  PdfCommitStatus,
 };
