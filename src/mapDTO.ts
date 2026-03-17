@@ -1,4 +1,4 @@
-import type { GeocodePrecision, MapJobStatus, PartnerSchoolStatus } from "./mapEnums";
+import type { GeocodePrecision, MapJobStatus, PartnerSchoolStatus, PdfImportJobStatus, PdfPreviewReviewStatus } from "./mapEnums";
 
 type MapPointDTO = {
   id: string;
@@ -127,6 +127,75 @@ type ApiErrorDTO = {
   error: string;
 };
 
+type PdfLanguageRequirementsDTO = {
+  summary: string;
+  cefrLevel: string;
+  localLanguageRequirement: string;
+  englishRequirement: string;
+};
+
+type PdfExtractionPreviewRowDTO = {
+  rowId: string;
+  institutionName: string;
+  subunitName: string;
+  country: string;
+  continent: string;
+  cities: string[];
+  agreementAppliesTo: string;
+  degreeProgrammesInAgreement: string[];
+  mobilityProgrammes: string[];
+  languageRequirements: PdfLanguageRequirementsDTO;
+  furtherInfo: string;
+  tuitionFeeBased: boolean;
+  agreementNegotiationsOngoing: boolean;
+  sourcePage: number;
+  sourceSnippet: string;
+  confidence: number;
+  missingFields: string[];
+  aiFlags: string[];
+  validationFlags: string[];
+  reviewStatus?: PdfPreviewReviewStatus;
+};
+
+type PdfExtractionSummaryDTO = {
+  totalRows: number;
+  rowsWithWarnings: number;
+  averageConfidence: number;
+  missingFieldCount: number;
+};
+
+type PdfFileMetadataDTO = {
+  originalFileName: string;
+  fileSizeBytes: number;
+  mimeType: string;
+  pageCount?: number;
+};
+
+type PdfImportStatusDTO = {
+  _id: string;
+  status: PdfImportJobStatus;
+  createdAt: string;
+  startedAt?: string;
+  finishedAt?: string;
+  errorLog?: string;
+  extractionSummary?: PdfExtractionSummaryDTO;
+  warnings?: string[];
+  fileMetadata: PdfFileMetadataDTO;
+};
+
+type StartPdfImportResponseDTO = {
+  importId: string;
+};
+
+type PdfImportRowsResponseDTO = {
+  _id: string;
+  status: PdfImportJobStatus;
+  rows: PdfExtractionPreviewRowDTO[];
+  extractionSummary?: PdfExtractionSummaryDTO;
+  warnings?: string[];
+  fileMetadata: PdfFileMetadataDTO;
+};
+
 export type {
   MapPointDTO,
   MapPointsResponseDTO,
@@ -143,4 +212,11 @@ export type {
   StartGeocodeResponseDTO,
   LatestGeocodeResponseDTO,
   ApiErrorDTO,
+  PdfLanguageRequirementsDTO,
+  PdfExtractionPreviewRowDTO,
+  PdfExtractionSummaryDTO,
+  PdfFileMetadataDTO,
+  PdfImportStatusDTO,
+  StartPdfImportResponseDTO,
+  PdfImportRowsResponseDTO,
 };

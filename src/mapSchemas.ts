@@ -1,5 +1,5 @@
 import { MAP_DEFAULTS, PARTNER_SCHOOL_STATUSES } from "./mapEnums";
-import type { MapPointsQueryDTO } from "./mapDTO";
+import type { MapPointsQueryDTO, PdfExtractionPreviewRowDTO } from "./mapDTO";
 
 type ParseSuccess<T> = { ok: true; value: T };
 type ParseFail = { ok: false; error: string };
@@ -19,6 +19,24 @@ type ParsedMapPointsQuery = {
 
 type ParsedGeocodeStart = {
   limit: number;
+};
+
+type ParsedPdfExtractionPreview = {
+  rows: PdfExtractionPreviewRowDTO[];
+  extractionSummary: {
+    totalRows: number;
+    rowsWithWarnings: number;
+    averageConfidence: number;
+    missingFieldCount: number;
+  };
+  warnings: string[];
+  fileMetadata: {
+    originalFileName: string;
+    fileSizeBytes: number;
+    mimeType: string;
+    pageCount?: number;
+  };
+  status: "queued" | "running" | "completed" | "failed";
 };
 
 function parseBbox(raw: string): ParseResult<[number, number, number, number]> {
@@ -100,13 +118,105 @@ function parseGeocodeStartInput(limitInput: unknown): ParsedGeocodeStart {
   };
 }
 
+function normalizeStringArray(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  return input
+    .map((item) => (typeof item === "string" ? item.trim() : ""))
+    .filter(Boolean);
+}
+
+function parsePdfExtractionPreviewPayload(input: unknown): ParseResult<ParsedPdfExtractionPreview> {
+  if (!input || typeof input !== "object") return { ok: false, error: "Extraction payload must be an object" };
+  const payload = input as Record<string, unknown>;
+
+  if (!Array.isArray(payload.rows)) return { ok: false, error: "rows must be an array" };
+
+  const rows: PdfExtractionPreviewRowDTO[] = [];
+  for (const item of payload.rows) {
+    if (!item || typeof item !== "object") return { ok: false, error: "rows contains an invalid row" };
+    const row = item as Record<string, unknown>;
+
+    const sourcePage = Number(row.sourcePage);
+    const confidence = Number(row.confidence);
+    if (!Number.isFinite(sourcePage) || sourcePage < 0) return { ok: false, error: "row sourcePage must be a non-negative number" };
+    if (!Number.isFinite(confidence) || confidence < 0 || confidence > 1) return { ok: false, error: "row confidence must be between 0 and 1" };
+
+    const institutionName = String(row.institutionName ?? "").trim();
+    const sourceSnippet = String(row.sourceSnippet ?? "").trim();
+    if (!institutionName) return { ok: false, error: "row institutionName is required" };
+    if (!sourceSnippet) return { ok: false, error: "row sourceSnippet is required" };
+
+    rows.push({
+      rowId: String(row.rowId ?? "").trim() || "",
+      institutionName,
+      subunitName: String(row.subunitName ?? "").trim(),
+      country: String(row.country ?? "").trim(),
+      continent: String(row.continent ?? "").trim(),
+      cities: normalizeStringArray(row.cities),
+      agreementAppliesTo: String(row.agreementAppliesTo ?? "").trim(),
+      degreeProgrammesInAgreement: normalizeStringArray(row.degreeProgrammesInAgreement),
+      mobilityProgrammes: normalizeStringArray(row.mobilityProgrammes),
+      languageRequirements: {
+        summary: String((row.languageRequirements as Record<string, unknown> | undefined)?.summary ?? "").trim(),
+        cefrLevel: String((row.languageRequirements as Record<string, unknown> | undefined)?.cefrLevel ?? "").trim(),
+        localLanguageRequirement: String((row.languageRequirements as Record<string, unknown> | undefined)?.localLanguageRequirement ?? "").trim(),
+        englishRequirement: String((row.languageRequirements as Record<string, unknown> | undefined)?.englishRequirement ?? "").trim(),
+      },
+      furtherInfo: String(row.furtherInfo ?? "").trim(),
+      tuitionFeeBased: Boolean(row.tuitionFeeBased),
+      agreementNegotiationsOngoing: Boolean(row.agreementNegotiationsOngoing),
+      sourcePage,
+      sourceSnippet,
+      confidence,
+      missingFields: normalizeStringArray(row.missingFields),
+      aiFlags: normalizeStringArray(row.aiFlags),
+      validationFlags: normalizeStringArray(row.validationFlags),
+      reviewStatus: undefined,
+    });
+  }
+
+  const extractionSummaryRaw = payload.extractionSummary as Record<string, unknown> | undefined;
+  const extractionSummary = {
+    totalRows: Number(extractionSummaryRaw?.totalRows ?? rows.length) || rows.length,
+    rowsWithWarnings: Number(extractionSummaryRaw?.rowsWithWarnings ?? 0) || 0,
+    averageConfidence: Number(extractionSummaryRaw?.averageConfidence ?? 0) || 0,
+    missingFieldCount: Number(extractionSummaryRaw?.missingFieldCount ?? 0) || 0,
+  };
+
+  const fileMetadataRaw = payload.fileMetadata as Record<string, unknown> | undefined;
+  const fileMetadata = {
+    originalFileName: String(fileMetadataRaw?.originalFileName ?? "").trim(),
+    fileSizeBytes: Number(fileMetadataRaw?.fileSizeBytes ?? 0) || 0,
+    mimeType: String(fileMetadataRaw?.mimeType ?? "application/pdf").trim(),
+    pageCount: Number.isFinite(Number(fileMetadataRaw?.pageCount)) ? Number(fileMetadataRaw?.pageCount) : undefined,
+  };
+
+  const statusCandidate = String(payload.status ?? "completed").trim().toLowerCase();
+  const status = statusCandidate === "queued" || statusCandidate === "running" || statusCandidate === "failed"
+    ? statusCandidate
+    : "completed";
+
+  return {
+    ok: true,
+    value: {
+      rows,
+      extractionSummary,
+      warnings: normalizeStringArray(payload.warnings),
+      fileMetadata,
+      status,
+    },
+  };
+}
+
 export {
   parseMapPointsQuery,
   parseGeocodeStartInput,
+  parsePdfExtractionPreviewPayload,
 };
 
 export type {
   ParseResult,
   ParsedMapPointsQuery,
   ParsedGeocodeStart,
+  ParsedPdfExtractionPreview,
 };
