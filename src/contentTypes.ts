@@ -249,7 +249,8 @@ type ProfileResponse = {
   _id: string;
   userName: string;
   email: string;
-  registeredAt: string;
+  registeredAt: Date;
+  lastSignedInAt: Date;
   user_level_id?: number;
   favorites: string[];
   documents: Document[];
