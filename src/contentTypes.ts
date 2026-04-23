@@ -100,6 +100,7 @@ type Document = {
   sourceType: DocumentSourceType;
   platformName?: string; 
   addedAt: string;
+  notes?: string;
   lastVerified?: string; // Last time link was verified as working
   isAccessible?: boolean; 
   accessPermission?: "public" | "restricted" | "unknown";
